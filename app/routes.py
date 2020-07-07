@@ -1,39 +1,19 @@
-import os
 import json
-from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer
+from flask import jsonify, request
+from flask_bcrypt import Bcrypt
+from app.models import User, Product
+from app import app, db
 
-project_dir = os.path.dirname(os.path.abspath(__file__))
-database_file = 'sqlite:///{}'.format(os.path.join(project_dir, "productdatabase.db"))
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = database_file
-app.config['JSON_SORT_KEYS'] = False
-
-db = SQLAlchemy(app)
-
-current_id = 10
-
-class Product(db.Model):
-    __tablename__ = 'products'
-
-    id = Column('id', Integer, primary_key=True)
-    item_name = Column('name', String, nullable=False, default="N/A")
-    school_event = Column('event', String, nullable=False, default="N/A")
-    storage_location = Column('location', String, nullable=False, default="N/A")
-    quantity = Column('quantity', Integer, nullable=False, default=0)
-    price = Column('price', Integer, nullable=False, default=0)
-    pic_location = Column('picture', String, nullable=True)
+bcrypt = Bcrypt(app)
 
 @app.route("/", methods=['GET'])
 def home():
     
-    price = request.args.get('price', 'All')
-    event = request.args.get('event', 'All')
+    # price = request.args.get('price', 'All')
+    # event = request.args.get('event', 'All')
+
     all_products =  Product.query.all()
 
-    name_array = []
     product_array = []
 
     for product in all_products:
@@ -44,7 +24,8 @@ def home():
             "location" : product.storage_location,
             "quantity" : product.quantity,
             "price" : product.price,
-            "picture" : product.pic_location
+            "picture" : product.pic_location,
+            "user_id" : product.user_id
         }
         product_array.append(temp_dict)
         
@@ -60,6 +41,7 @@ def add_item():
     quantity = req_data.get('quantity')
     price = req_data.get('price')
     picture = req_data.get('pic_location')
+    user_id = req_data.get('user_id')
 
     temp_product = Product(item_name=name, school_event=event, storage_location=location, quantity=quantity, price=price, pic_location=picture)
 
@@ -104,6 +86,33 @@ def edit_item():
         else: return jsonify({"status": "item by that ID DNE"}), 200
     else: return jsonify({"status": "nothing changed"}), 200
 
+@app.route('/register', methods=['POST'])
+def register():
+    req_data = request.get_json()
+    username = req_data.get('username')
+    password = req_data.get('password')
+    hashed_pass = bcrypt.generate_password_hash(password).decode('utf-8')
+    user = User(username=username, password=hashed_pass)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"status": "user created"}), 200
 
-if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    all_users =  User.query.all()
+    user_array = []
+
+    for user in all_users:
+        temp_dict = {
+            "user_id" : user.id,
+            "username" : user.username,
+            "password" : user.password
+        }
+        user_array.append(temp_dict)
+        
+    return jsonify(user_array)
+
+@app.route('/get_user', methods=['GET'])
+def get_user():
+    req_data = request.get_json()
+    username = req_data.get('username')
