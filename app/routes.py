@@ -5,10 +5,10 @@ from app import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
 
 @app.route("/", methods=['GET'])
-#@login_required
+@login_required
 def home():
-    #all_products =  Product.query.filter_by(user_id=current_user.id).all()
-    all_products = Product.query.all()
+    all_products =  Product.query.filter_by(user_id=current_user.id).all()
+    #all_products = Product.query.all()
     product_array = []
 
     for product in all_products:
@@ -43,7 +43,6 @@ def add_item():
 
     db.session.add(temp_product)
     db.session.commit()
-    #app.logger.info(temp_product.id)
 
     return jsonify({"status" : "success"}), 200
 
@@ -56,9 +55,9 @@ def delete_item():
         if item_to_delete.user_id==current_user.id:
             db.session.delete(item_to_delete)
             db.session.commit()
-            return jsonify({"status": "item deleted"}), 200
-    else: 
-        return jsonify({"status" : "none deleted"})
+            return jsonify({"status": "item deleted"}), 200 
+    
+    return jsonify({"status" : "none deleted"})
 
 @app.route('/edit_item', methods=['PUT'])
 @login_required

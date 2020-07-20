@@ -1,5 +1,5 @@
 from app import db, login_manager, config
-from sqlalchemy import Column, String, Integer, ForeignKey, MetaData
+from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 import pymysql
@@ -31,41 +31,3 @@ class Product(db.Model):
 
 db.create_all()
 db.session.commit()
-
-def getDatabaseConnection(ipaddress, usr, passwd, charset, curtype):
-    sqlCon  = pymysql.connect(host=ipaddress, user=usr, password=passwd, charset=charset, cursorclass=curtype);
-    return sqlCon;
-
-def createUser(cursor, userName, password, database,
-               querynum=0, 
-               updatenum=0, 
-               connection_num=0):
-    try:
-        sqlCreateUser = "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';" %(userName, password)
-        cursor.execute(sqlCreateUser)
-    except Exception as Ex:
-        print("Error creating MySQL User: %s"%(Ex))
-    
-    try:
-        grant_permissions = "GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%';"%(database, userName)
-        cursor.execute(grant_permissions)
-    except Exception as Ex:
-        print("Error Granting Permissions: %s"%(Ex));
-    
-    try:
-        flush_permissions = "FLUSH PRIVILEGES;"
-        cursor.execute(flush_permissions)
-    except Exception as Ex:
-        print("Error flushing: %s"%(Ex))
-
-ipaddress = "127.0.0.1"  # MySQL server is running on local machine
-usr = "root"      
-passwd = "db_pass"            
-charset = "utf8mb4"    
-curtype = pymysql.cursors.DictCursor
-database = config.get('database')
-
-mySQLConnection = getDatabaseConnection(ipaddress, usr, passwd, charset, curtype);
-mySQLCursor = mySQLConnection.cursor()
-
-createUser(mySQLCursor, "main_user_nine","password", database)
