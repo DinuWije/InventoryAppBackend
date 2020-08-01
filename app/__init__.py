@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
 
 config = {
     'host': 'mysql-development',
@@ -31,18 +31,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 app.config['SQLALCHEMY_DATABASE_URI'] = database_file
 app.config['JSON_SORT_KEYS'] = False
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = '/login'
+jwt = JWTManager(app)
 
 # connect to database
 engine = db.create_engine(database_file, {})
 connection = engine.connect()
-
-# pull metadata of a table
-#metadata = db.MetaData()
 
 from app import routes

@@ -2,11 +2,15 @@ import json
 from flask import jsonify, request
 from app.models import User, Product
 from app import app, db, bcrypt
-from flask_login import login_user, current_user, logout_user, login_required
+from flask_jwt_extended import (create_access_token, create_refresh_token, 
+                                jwt_required, get_jwt_identity, get_raw_jwt, 
+                                jwt_optional)
 
 @app.route("/", methods=['GET'])
-@login_required
+@jwt_required
 def home():
+    jwt_current_user = get_jwt_identity()
+    current_user = User.query.filter_by(username=jwt_current_user).first()
     all_products =  Product.query.filter_by(user_id=current_user.id).all()
     #all_products = Product.query.all()
     product_array = []
@@ -27,8 +31,10 @@ def home():
     return jsonify(product_array)
 
 @app.route('/add_item', methods=['POST'])
-@login_required
+@jwt_required
 def add_item():
+    jwt_current_user = get_jwt_identity()
+    current_user = User.query.filter_by(username=jwt_current_user).first()
     req_data = request.get_json()
 
     name = req_data.get('name')
@@ -47,8 +53,10 @@ def add_item():
     return jsonify({"status" : "success"}), 200
 
 @app.route('/delete_item', methods=['DELETE'])
-@login_required
+@jwt_required
 def delete_item():
+    jwt_current_user = get_jwt_identity()
+    current_user = User.query.filter_by(username=jwt_current_user).first()
     id = request.args.get('id')
     if id != None:
         item_to_delete = Product.query.get(id)
@@ -60,8 +68,10 @@ def delete_item():
     return jsonify({"status" : "none deleted"})
 
 @app.route('/edit_item', methods=['PUT'])
-@login_required
+@jwt_required
 def edit_item():
+    jwt_current_user = get_jwt_identity()
+    current_user = User.query.filter_by(username=jwt_current_user).first()
     req_data = request.get_json()
     id = req_data.get('id')
     if id != None:
@@ -91,12 +101,21 @@ def register():
     password = req_data.get('password')
     hashed_pass = bcrypt.generate_password_hash(password).decode('utf-8')
     user = User.query.filter_by(username=username).first()
-    status = "Error: that username is already taken"
+    
+    status = 'error'
+    
     if user==None:
-        user = User(username=username, password=hashed_pass)
-        db.session.add(user)
-        db.session.commit()
-        status = "success"
+        try:
+            user = User(username=username, password=hashed_pass)
+            db.session.add(user)
+            db.session.commit()
+            access_token = create_access_token(identity=username, expires_delta=False)
+            status = f'{access_token}'
+        except:
+            pass
+    else:
+        status = 'username taken'
+    
     return status
 
 @app.route('/login', methods=['POST'])
@@ -105,25 +124,20 @@ def login():
     username = req_data.get('username')
     password = req_data.get('password')
 
-    status = "Error: incorrect username or password"
+    status = 'error'
     user = User.query.filter_by(username=username).first()
     if user and bcrypt.check_password_hash(user.password, password):
-        login_user(user, remember=True)
-        if current_user.is_authenticated:
-            status = "success"
+        access_token = create_access_token(identity=username, expires_delta=False)
+        status = f'{access_token}'
 
     return status
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return jsonify({"status": "logged out"})
-
-
 @app.route('/this_user')
+@jwt_optional
 def this_user():
-    if current_user.is_authenticated:
+    jwt_current_user = get_jwt_identity()
+    current_user = User.query.filter_by(username=jwt_current_user).first()
+    if current_user!=None:
         user = {
             "id" : current_user.id,
             "username" : current_user.username
@@ -139,9 +153,15 @@ def get_users():
     for user in all_users:
         temp_dict = {
             "user_id" : user.id,
-            "username" : user.username,
-            "password" : user.password
+            "username" : user.username
         }
         user_array.append(temp_dict)
         
     return jsonify(user_array)
+    
+
+@app.route('/get_user')
+@jwt_required
+def get_user():
+    current_user = get_jwt_identity()
+    return current_user

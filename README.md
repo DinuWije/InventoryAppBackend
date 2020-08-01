@@ -1,3 +1,3 @@
-REST API Backend for InventoryManager app. Includes a web server created with Flask and a Database created with SQLAlchemy. 
+REST API Backend for InventoryManager app. Includes a web server created with Flask and a MYSQL Database created with SQLAlchemy. 
 
-The database (at time of first commit) is SQLite hosted locally, and must be created in local port 5000 before running the InventoryManager app in order to save data. The plan for a future version is to switch the database to Postgres and host on AWS in order to remove this extra step.
+The database is currently hosted locally, and can be created with the docker-compose.yml (must have Docker running). 
