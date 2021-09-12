@@ -6,7 +6,7 @@ The REST API Backend for the Android app includes a web server created with Flas
 
 The database and web server were containerized with Docker and are currently hosted on an AWS EC2 instance.
 
-## Architechture Diagram
+## Architecture Diagram
 ![EZventory Diagram](https://user-images.githubusercontent.com/50289930/132991052-c8288757-2a0a-40a5-a82c-1f778340d8c0.jpeg)
 
 ## Demo!
