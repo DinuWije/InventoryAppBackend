@@ -10,5 +10,5 @@ The database and web server were containerized with Docker and are currently hos
 ![EZventory Diagram](https://user-images.githubusercontent.com/50289930/132991052-c8288757-2a0a-40a5-a82c-1f778340d8c0.jpeg)
 
 ## Demo!
-[Try a brief demo](https://image-repo-2021.herokuapp.com/) of image upload/download endpoints (give 30s for the Heroku demo instance to spin up)! For full functionality tests, download the app from [Google Play Store](https://play.google.com/store/apps/details?id=com.dinuw.firstapp)!
+Use Swagger to [try a brief demo](https://image-repo-2021.herokuapp.com/) of image upload/download endpoints (give 30s for the Heroku demo instance to spin up)! For full functionality tests, download the app from [Google Play Store](https://play.google.com/store/apps/details?id=com.dinuw.firstapp)!
 
