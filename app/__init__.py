@@ -5,7 +5,7 @@ from sqlalchemy.engine.url import URL
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
-
+from app.swagger_demo import blueprint as demo_endpoints
 config = {
     'host': 'mysql-development',
     'port': 3306,
@@ -32,7 +32,9 @@ app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 app.config['SQLALCHEMY_DATABASE_URI'] = database_file
 app.config['JSON_SORT_KEYS'] = False
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+app.config['RESTPLUS_MASK_SWAGGER'] = False
 
+app.register_blueprint(demo_endpoints)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
