@@ -1,4 +1,4 @@
-# EZventory Image & Inventory Repository Backend
+# Image & Inventory Repository Backend
 
 EZventory is an Mobile App I designed to help small organizations keep track of their inventory, [now available on the Play Store](https://play.google.com/store/apps/details?id=com.dinuw.firstapp)! The app was originally designed to support my high school's student council organize their invenotry of items for different school events, and features image saving and deleting, user accounts/login, cloud saving, CRUD operations on inventory items, and CSV exports. 
 
